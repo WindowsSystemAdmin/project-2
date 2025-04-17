@@ -1,3 +1,10 @@
+Prerequisites:
+pip install transformers torch tqdm
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
