@@ -13,7 +13,6 @@ from transformers import AutoTokenizer, AutoModel
 from collections import defaultdict
 import numpy as np
 from tqdm import tqdm
-
 import os
 import urllib.request
 
