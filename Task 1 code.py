@@ -3,7 +3,7 @@ pip install transformers torch tqdm
 
 # Dataset:
 
-https://www.cs.fsu.edu/~liux/courses/deepRL/assignments/word-test.v1.txt
+#https://www.cs.fsu.edu/~liux/courses/deepRL/assignments/word-test.v1.txt
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -13,7 +13,6 @@ from transformers import AutoTokenizer, AutoModel
 from collections import defaultdict
 import numpy as np
 from tqdm import tqdm
-
 import os
 import urllib.request
 
