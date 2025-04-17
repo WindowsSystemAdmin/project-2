@@ -14,6 +14,21 @@ from collections import defaultdict
 import numpy as np
 from tqdm import tqdm
 
+import os
+import urllib.request
+
+# Dataset URL and filename
+dataset_url = 'https://www.cs.fsu.edu/~liux/courses/deepRL/assignments/word-test.v1.txt'
+dataset_filename = 'word-test.v1.txt'
+
+# Download if not exists
+if not os.path.exists(dataset_filename):
+    print("Downloading dataset...")
+    urllib.request.urlretrieve(dataset_url, dataset_filename)
+    print("Download complete.")
+else:
+    print("Dataset already exists.")
+
 # Load BERT model and tokenizer
 model_name = 'bert-base-uncased'
 tokenizer = AutoTokenizer.from_pretrained(model_name)
