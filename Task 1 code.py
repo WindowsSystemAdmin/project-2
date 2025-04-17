@@ -3,7 +3,7 @@ pip install transformers torch tqdm
 
 # Dataset:
 
-https://www.cs.fsu.edu/~liux/courses/deepRL/assignments/word-test.v1.txt
+#https://www.cs.fsu.edu/~liux/courses/deepRL/assignments/word-test.v1.txt
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
