@@ -1,26 +1,18 @@
 # Prerequisites:
-pip install transformers torch tqdm
+# pip install transformers torch tqdm
 
-# Dataset:
-
-#https://www.cs.fsu.edu/~liux/courses/deepRL/assignments/word-test.v1.txt
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
+import os
+import urllib.request
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
 from collections import defaultdict
-import numpy as np
 from tqdm import tqdm
-import os
-import urllib.request
 
-# Dataset URL and filename
+# Download dataset if not exists
 dataset_url = 'https://www.cs.fsu.edu/~liux/courses/deepRL/assignments/word-test.v1.txt'
 dataset_filename = 'word-test.v1.txt'
 
-# Download if not exists
 if not os.path.exists(dataset_filename):
     print("Downloading dataset...")
     urllib.request.urlretrieve(dataset_url, dataset_filename)
@@ -49,7 +41,7 @@ def cosine_sim(a, b):
 def l2_dist(a, b):
     return torch.norm(a - b).item()
 
-# Load dataset
+# Load dataset and group by category
 def load_dataset(filepath):
     groups = defaultdict(list)
     with open(filepath, 'r') as f:
@@ -63,7 +55,7 @@ def load_dataset(filepath):
                     groups[current_group].append(tuple(words))
     return groups
 
-# Perform analogy evaluation
+# Evaluate analogy predictions
 def evaluate_group(name, data):
     vocab = set()
     for a, b, c, d in data:
@@ -73,26 +65,27 @@ def evaluate_group(name, data):
     results_cosine = {1: 0, 2: 0, 5: 0, 10: 0, 20: 0}
     results_l2 = {1: 0, 2: 0, 5: 0, 10: 0, 20: 0}
 
-    for a, b, c, d in tqdm(data, desc=f'Evaluating {name}'):
+    for i, (a, b, c, d) in enumerate(tqdm(data, desc=f'Evaluating {name}')):
         try:
             vec_a = get_word_embedding(a)
             vec_b = vocab_embeddings[b]
             vec_c = get_word_embedding(c)
             target_vec = vocab_embeddings[d]
 
-            vec_ab = vec_a - vec_b
+            predicted_vec = vec_b - vec_a + vec_c
+
             scores_cosine = []
             scores_l2 = []
 
             for candidate, vec_d in vocab_embeddings.items():
-                if candidate in [b, d]:
+                if candidate == b:  # Only exclude the base word
                     continue
-                vec_cd = vec_c - vec_d
-                scores_cosine.append((candidate, cosine_sim(vec_ab, vec_cd)))
-                scores_l2.append((candidate, l2_dist(vec_ab, vec_cd)))
+                scores_cosine.append((candidate, cosine_sim(predicted_vec, vec_d)))
+                scores_l2.append((candidate, l2_dist(predicted_vec, vec_d)))
 
             sorted_cosine = sorted(scores_cosine, key=lambda x: -x[1])
             sorted_l2 = sorted(scores_l2, key=lambda x: x[1])
+
 
             def is_correct(sorted_list, k):
                 return any(candidate == d for candidate, _ in sorted_list[:k])
@@ -102,7 +95,8 @@ def evaluate_group(name, data):
                     results_cosine[k] += 1
                 if is_correct(sorted_l2, k):
                     results_l2[k] += 1
-        except:
+        except Exception as e:
+            print(f"Error on analogy: {a}:{b}::{c}:{d} → {e}")
             continue
 
     total = len(data)
@@ -113,9 +107,9 @@ def evaluate_group(name, data):
         acc_l2 = 100 * results_l2[k] / total
         print(f"{k:<5}{acc_cosine:<35.2f}{acc_l2:.2f}")
 
-# === Run the full evaluation ===
+# Run evaluation
 if __name__ == "__main__":
-    filepath = 'word-test.v1.txt'  # Replace with full path if needed
+    filepath = dataset_filename
     all_groups = load_dataset(filepath)
 
     for group in ['family', 'city-in-state', 'currency']:
